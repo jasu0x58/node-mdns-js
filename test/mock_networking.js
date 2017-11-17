@@ -79,7 +79,7 @@ MockNetworking.prototype.removeUsage = function (browser) {
 
 MockNetworking.prototype.receive = function (packets) {
   debug('receive %s packets', packets.length);
-  
+
   this.emit('packets', packets, mockRemote, mockConnection);
 };
 

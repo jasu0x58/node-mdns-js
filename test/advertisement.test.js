@@ -89,7 +89,7 @@ describe('packetfactory', function () {
 
       //header
       expect(packet.header).to.include({rd: 0, aa: 1, qr: 1});
-      
+
       //questions
       expect(packet.question).to.have.length(0);
       //answers
@@ -113,9 +113,9 @@ describe('packetfactory', function () {
         testQd(received[2].packet,received[2].buffer );
         testAN(received[3].packet, received[3].buffer);
 
-        received.forEach((data)=> {
-          console.log('test => %j', data.packet);
-        });
+        // received.forEach((data)=> {
+        //   console.log('test => %j', data.packet);
+        // });
         resolve();
       }, 2000);
     });

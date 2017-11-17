@@ -14,9 +14,9 @@ const MockNetwork = require('./mock_networking');
 const mockNet = new MockNetwork();
 var mdns = new Mdns({networking: mockNet});
 
-mockNet.on('send', (packet, buffer) => {
+mockNet.on('send', () => {
   var p = DNSPacket.parse(new Buffer.from(packets.responses.services.linux_workstation, 'hex'));
-  
+
 
   mockNet.receive([p]);
 });
@@ -44,7 +44,7 @@ describe('mDNS', function () {
 
   it('should .discover()', {skip: process.env.MDNS_NO_RESPONSE}, () => {
     setTimeout(browser.discover.bind(browser), 500);
-    
+
     return new Promise((resolve) => {
       browser.once('update', function onUpdate(data) {
         expect(data).to.include(['interfaceIndex', 'networkInterface',
@@ -53,7 +53,7 @@ describe('mDNS', function () {
       });
     });
 
-    
+
   });
 
 });
