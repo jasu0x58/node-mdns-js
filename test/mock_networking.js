@@ -4,6 +4,9 @@ const EventEmitter = require('events').EventEmitter;
 const dns = require('dns-js');
 const DNSPacket = dns.DNSPacket;
 
+const mockRemote = {address: '127.0.0.20', port: '1024'};
+const mockConnection = {networkInterface: 'ethMock'};
+
 const MockNetworking = module.exports = function (options) {
   this.options = options || {};
   this.created = 0;
@@ -35,7 +38,7 @@ MockNetworking.prototype.stop = function () {
 
 
 MockNetworking.prototype.send = function (packet) {
-  debug('sending faked packet');
+  debug('sending mock packet');
   var buf = DNSPacket.toBuffer(packet);
   this.emit('send', {packet: packet, buffer: buf});
 };
@@ -60,9 +63,28 @@ MockNetworking.prototype.startRequest = function (callback) {
   });
 };
 
+MockNetworking.prototype.removeUsage = function (browser) {
+  var index = this.users.indexOf(browser);
+  if (index > -1) {
+    this.users.splice(index, 1);
+  }
+  // TODO should also clear stale state out of addresses table
+  this.connections.forEach(function (c) {
+    if (c.services && c.services[browser.serviceType.toString()]) {
+      delete c.services[browser.serviceType.toString()];
+    }
+  });
+  this.stopRequest();
+};
 
 MockNetworking.prototype.receive = function (packets) {
   debug('receive %s packets', packets.length);
-  this.emit('packets', packets);
+  
+  this.emit('packets', packets, mockRemote, mockConnection);
 };
 
+MockNetworking.prototype.stopRequest = function () {
+  if (this.users.length === 0) {
+    this.stop();
+  }
+};

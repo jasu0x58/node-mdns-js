@@ -3,11 +3,23 @@ const Lab = require('lab');
 const { after, before, describe,  it } = exports.lab = Lab.script();
 const { expect } = require('code');
 
+const { DNSPacket } = require('dns-js');
+
+const packets = require('./packets.json');
 
 // var Code = require('code');   // assertion library
 // var expect = Code.expect;
-var mdns = require('../');
+const Mdns = require('../lib');
+const MockNetwork = require('./mock_networking');
+const mockNet = new MockNetwork();
+var mdns = new Mdns({networking: mockNet});
 
+mockNet.on('send', (packet, buffer) => {
+  var p = DNSPacket.parse(new Buffer.from(packets.responses.services.linux_workstation, 'hex'));
+  
+
+  mockNet.receive([p]);
+});
 
 
 describe('mDNS', function () {
@@ -31,13 +43,17 @@ describe('mDNS', function () {
 
 
   it('should .discover()', {skip: process.env.MDNS_NO_RESPONSE}, () => {
-    browser.once('update', function onUpdate(data) {
-      expect(data).to.include(['interfaceIndex', 'networkInterface',
-        'addresses', 'query']);
-
+    setTimeout(browser.discover.bind(browser), 500);
+    
+    return new Promise((resolve) => {
+      browser.once('update', function onUpdate(data) {
+        expect(data).to.include(['interfaceIndex', 'networkInterface',
+          'addresses', 'query']);
+        resolve();
+      });
     });
 
-    setTimeout(browser.discover.bind(browser), 500);
+    
   });
 
 });
