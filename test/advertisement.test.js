@@ -10,7 +10,7 @@ const Mdns = require('../lib');
 const MockNetworking = require('./mock_networking');
 var mockNetworking = new MockNetworking();
 var mdns = new Mdns({networking: mockNetworking});
-
+const {ServiceType} = require('../lib/service_type');
 var pf = require('../lib/packetfactory');
 
 
@@ -60,7 +60,7 @@ describe('packetfactory', function () {
 
   });
 
-  it('issue70_txt-with-dot', {timeout: 3000}, () => {
+  it('issue70_txt-with-dot', {timeout: 5000}, () => {
     var mn = new MockNetworking();
     var myMdns = new Mdns({networking: mn});
     var service = myMdns.createAdvertisement(mdns.tcp('_http'), 9876, {
@@ -100,14 +100,39 @@ describe('packetfactory', function () {
       expect(packet.authority).to.have.length(0);
     }
 
+    function createQuestion(dnsType, dnsClass, st) {
+      if (typeof st === 'undefined') {
+        st = ServiceType.wildcard + '.local';
+      }
+      const packet = new DNSPacket();
+      packet.question.push(new DNSRecord(
+        st,
+        dnsType, dnsClass)
+      );
+      return packet;
+    }
+
     return new Promise((resolve)=> {
       var received = [];
+
       mn.on('send', (data) => {
         received.push(data);
+        if (received.length === 5) {
+          //query
+          mn.receive([
+            createQuestion(DNSRecord.Type.PTR, 1),
+            createQuestion(DNSRecord.Type.MX, 1),
+            createQuestion(DNSRecord.Type.PTR, DNSRecord.Class.FLUSH),
+
+            createQuestion(DNSRecord.Type.PTR, 1, '_ftp._tcp'),
+          ]);
+        }
+
       });
 
+
       setTimeout(() => {
-        expect(received.length).to.equal(5);
+        expect(received.length).to.min(5);
         testQd(received[0].packet,received[0].buffer );
         testQd(received[1].packet,received[1].buffer );
         testQd(received[2].packet,received[2].buffer );
@@ -116,7 +141,9 @@ describe('packetfactory', function () {
         // received.forEach((data)=> {
         //   console.log('test => %j', data.packet);
         // });
-        resolve();
+        setTimeout(()=> {
+          resolve();
+        },1000);
       }, 2000);
     });
   });
