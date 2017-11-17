@@ -44,15 +44,15 @@ MockNetworking.prototype.send = function (packet) {
 };
 
 MockNetworking.prototype.addUsage = function (browser, next) {
-  debug('addUsage');
+  debug('addUsage(%s, %s)', typeof browser, typeof next);
   this.users.push(browser);
   this.startRequest(next);
 };
 
 MockNetworking.prototype.startRequest = function (callback) {
   if (this.started) {
-    debug('startRequest:started');
-    return process.nextTick(callback());
+    debug('startRequest:started', typeof callback);
+    return process.nextTick(callback);
   }
   this.start();
   this.once('ready', function () {

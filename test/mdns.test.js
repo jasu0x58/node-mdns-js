@@ -7,6 +7,7 @@ const { DNSPacket } = require('dns-js');
 
 const packets = require('./packets.json');
 
+
 // var Code = require('code');   // assertion library
 // var expect = Code.expect;
 const Mdns = require('../lib');
@@ -16,8 +17,6 @@ var mdns = new Mdns({networking: mockNet});
 
 mockNet.on('send', () => {
   var p = DNSPacket.parse(new Buffer.from(packets.responses.services.linux_workstation, 'hex'));
-
-
   mockNet.receive([p]);
 });
 
