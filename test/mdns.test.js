@@ -43,7 +43,7 @@ describe('mDNS', function () {
 
 
   // it('should .discover()', {skip: process.env.MDNS_NO_RESPONSE}, () => {
-    it('should .discover()', () => {
+  it('should .discover()', () => {
     setTimeout(browser.discover.bind(browser), 500);
 
     return new Promise((resolve) => {

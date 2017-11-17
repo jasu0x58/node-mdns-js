@@ -27,7 +27,7 @@
     "lab": "^15.1.2"
   },
   "scripts": {
-    "test": "lab --flat && npm run lint",
+    "test": "lab --flat --coverage && npm run lint",
     "lint": "eslint test examples lib index.js",
     "doc": "jsdoc -d .\\doc index.js lib"
   },
